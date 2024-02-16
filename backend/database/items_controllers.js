@@ -29,8 +29,8 @@ export async function addItem(itemData) {
 
   try {
     const [checkIfAlready] = await pool.query(
-      "SELECT * FROM Items WHERE ItemName = ?",
-      [itemData.ItemName]
+      "SELECT * FROM Items WHERE ItemName = ? AND ShopkeeperID=?",
+      [itemData.ItemName,itemData.ShopkeeperID]
     );
     // If there is at least one row, the item already exists
     if (checkIfAlready.length > 0) {

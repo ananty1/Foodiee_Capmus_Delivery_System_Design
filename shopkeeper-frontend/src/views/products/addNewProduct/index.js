@@ -23,8 +23,9 @@ import Toast_alert from '../alert/alert';
 
 
 const addNewProduct = () => {
+  const shopID = localStorage.getItem("shopID")?localStorage.getItem("shopID"):1;
   const [credentials, setCredentials] = useState({
-    "ShopkeeperID": 1,
+    "ShopkeeperID": shopID,
     "ItemName": "Jalebi",
     "Description": "I ate Pasta today at 6pm for snakcs, Rat loves pasta.",
     "Price": 40.00,

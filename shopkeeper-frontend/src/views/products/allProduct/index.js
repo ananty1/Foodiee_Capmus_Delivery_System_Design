@@ -44,7 +44,8 @@ const Tables = () => {
         (async () => {
             try {
                 // Fetch data from the new URL
-                const response = await fetch('http://localhost:5000/shopkeeper/catalogue/1');
+                const shopID = localStorage.getItem('shopID')?localStorage.getItem('shopID'):1;
+                const response = await fetch(`http://localhost:5000/shopkeeper/catalogue/${shopID}`);
 
                 if (!response.ok) {
                     // Handle non-successful response (optional)
@@ -95,8 +96,6 @@ const Tables = () => {
                                     <CIcon icon={icon.cilAvTimer} size="sm"/>ExpectedTime</CTableHeaderCell>
                                     <CTableHeaderCell scope="col">
                                     <CIcon icon={icon.cifIn} size="sm"/>CousineType</CTableHeaderCell>
-                                    <CTableHeaderCell scope="col">
-                                    <CIcon icon={icon.cifIn} size="sm"/>Actions</CTableHeaderCell>
                                 </CTableRow>
                             </CTableHead>
 
@@ -121,18 +120,7 @@ const Tables = () => {
                                             <CBadge color="success">{item.Price}</CBadge></CTableDataCell>
                                             <CTableDataCell><CBadge color="dark">{item.ExpectedTime}</CBadge></CTableDataCell>
                                             <CTableDataCell>{item.CousineType}</CTableDataCell>
-                                            <CTableDataCell>
-                                                <button className={"btn btn-success mx-2"}
-                                                     type="button" >
-                                                    <CIcon icon={icon.cilCheck} size="sm" />
-                                                </button>
-                                                <button className={"btn btn-danger mx-2"}
-                                                     type="button" >
-                                                    <CIcon icon={icon.cilTrash} size="sm" />
-                                                </button>
-                                                
-
-                                            </CTableDataCell>
+                                            
                                             
                                         </CTableRow>
                                     )

@@ -95,7 +95,7 @@ function UserSignupPage() {
                         e.target.value = e.target.value.slice(0, 10);
                       } else if (e.target.value < 0) {
                         e.target.value = null;
-                      } else if (e.target.value[0] == 0) {
+                      } else if (e.target.value[0] === 0) {
                         e.target.value = null;
                       }
                       handleChange(e);

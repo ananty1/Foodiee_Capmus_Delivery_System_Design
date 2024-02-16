@@ -40,13 +40,14 @@ const liveOrders = () => {
     const [alert, setalert] = useState(null);
     const [btnDisable, setBtnDisable] = useState({});
     const [uniqueUSERID, setuniqeUSERID] = useState([]);
+    const ShopID = localStorage.getItem("shopID") ? localStorage.getItem("shopID") : 1;
     useEffect(() => {
         // this variable is local to the effect, and will be set to true when the effect is cleaned up
         let ignore = false;
 
         (async () => {
             try {
-                const ShopID = localStorage.getItem("shopID") ? localStorage.getItem("shopID") : 1;
+
                 // Fetch data from the new URL
                 const response = await fetch(`http://localhost:5000/shopkeeper/live-orders/${ShopID}`);
 
@@ -82,16 +83,15 @@ const liveOrders = () => {
     }, []);
     // console.log("users ids are ",typeof uniqueUSERID)
 
-    const approved = async (item, itemStatus) => {
+    const UpdateStatus = async (userID, itemStatus) => {
         try {
             const orderStatus = {
-                "USERID": item.UserID,
-                "ShopkeeperID": item.ShopkeeperID,
-                "itemID": item.ItemID,
+                "USERID": userID,
+                "ShopkeeperID": ShopID,
                 "orderStatus": itemStatus,
             }
-            console.log(orderStatus);
-            const res = await axios.put("http://localhost:5000/shopkeeper/update-order-status/1", orderStatus, {
+            console.log("Here arrived now ANANT", orderStatus);
+            const res = await axios.put(`http://localhost:5000/shopkeeper/update-order-status`, orderStatus, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -101,12 +101,14 @@ const liveOrders = () => {
                 setalert({
                     alert: itemStatus,
                     time: "less than a mins ago",
-                    message: `The item has been ${itemStatus.toLowerCase()}`
+                    message: `The item has been ${itemStatus.toLowerCase()}, Please Reload to see changes`,
+                    userID: userID
                 }
                 )
+                document.getElementById("")
                 // Update the status for the specific item
-                setdata(prevData => prevData.map(prevItem => (prevItem.ItemID === item.ItemID ? { ...prevItem, OrderStatus: itemStatus } : prevItem)))
-                setBtnDisable(prevState => ({ ...prevState, [item.ItemID]: true }));
+                setdata(prevData => prevData.map(prevItem => (prevItem.userID === userID ? { ...prevItem, OrderStatus: itemStatus } : prevItem)))
+
             }
         }
         catch (error) {
@@ -125,21 +127,25 @@ const liveOrders = () => {
 
     return (
         <div>
-
+            <CCard className='mb-4 text-center'>
+                <CCardHeader className="bg-primary text-white">
+                    <h5>Welcome to Live Orders</h5>
+                </CCardHeader>
+            </CCard>
             {uniqueUSERID.map((id, index) => {
                 // console.log(item);
                 return (
-                    <CRow>
+                    <CRow key={index}>
                         <CCol xs={12}>
                             <CCard className="mb-4">
                                 <CCardHeader>
-                                    <strong>LiveOrders </strong> <small>{id.UserID}</small>
+                                    <strong>Orders FROM</strong> <small> User: {id.UserID}</small>
                                 </CCardHeader>
                                 <CCardBody>
                                     <p className="text-medium-emphasis small">
                                         Please accept the pending request.
                                     </p>
-                                    {alert && <Toast_alert alert={alert} />}
+                                    {alert && id.UserID === alert.userID && <Toast_alert alert={alert} />}
 
                                     <CTable>
                                         <CTableHead>
@@ -150,7 +156,6 @@ const liveOrders = () => {
                                                 <CTableHeaderCell scope="col">TotalQuantity</CTableHeaderCell>
                                                 <CTableHeaderCell scope="col">TotalAmount</CTableHeaderCell>
                                                 <CTableHeaderCell scope="col">OrderStatus</CTableHeaderCell>
-                                                <CTableHeaderCell scope="col">Action</CTableHeaderCell>
                                             </CTableRow>
                                         </CTableHead>
 
@@ -164,36 +169,37 @@ const liveOrders = () => {
                                                 // console.log(item);
                                                 return (
 
-                                                    <CTableRow key={item.ItemID} className={item.OrderStatus === "Approved" ? "table-success" : item.OrderStatus === "Rejected" ? "table-danger" : ""}>
+                                                    <CTableRow key={item.ItemID} className={item.OrderStatus === "Approved" ? "table-primary" : item.OrderStatus === "Rejected" ? "table-danger" : item.OrderStatus === "OrderReadyToDeliver" ? "table-success" : ""}>
 
                                                         <CTableHeaderCell scope="row">{item.ItemID}</CTableHeaderCell>
-                                                        <CTableHeaderCell scope="row">{item.UserID}</CTableHeaderCell>
                                                         <CTableDataCell>{item.TotalQuantity}
                                                         </CTableDataCell>
                                                         <CTableDataCell>{item.TotalAmount}</CTableDataCell>
                                                         <CTableDataCell>
                                                             <CBadge color={item.OrderStatus === "Approved" ? "info" : item.OrderStatus === "Rejected" ? "danger" : item.OrderStatus === "OrderReadyToDeliver" ? "success" : "warning"}>{item.OrderStatus}</CBadge>
                                                         </CTableDataCell>
-                                                        <CTableDataCell>
-                                                            <button className={`btn btn-info mx-2 ${item.OrderStatus === "Approved" | item.OrderStatus === "Rejected" ? "disabled" : ""}`}
-                                                                onClick={() => approved(item, "Approved")} type="button" disabled={btnDisable[item.ItemID]}>
-                                                                <CIcon icon={icon.cilCheck} size="sm" />
-                                                            </button>
-                                                            <button className={`btn btn-danger ${item.OrderStatus === "Approved" | item.OrderStatus === "Rejected" ? "disabled" : ""}`}
-                                                                onClick={() => approved(item, "Rejected")} type="button" disabled={btnDisable[item.ItemID]}>
-                                                                <CIcon icon={icon.cilTrash} size="sm" />
-                                                            </button>
-
-                                                            <button className={`btn btn-success mx-2`}
-                                                                onClick={() => approved(item, "OrderReadyToDeliver")} type="button">
-                                                                <CIcon icon={icon.cilAlarm} size="sm" />
-                                                            </button>
-
-                                                        </CTableDataCell>
 
                                                     </CTableRow>
                                                 )
                                             })}
+                                            <CTableRow className="d-flex justify-content-end">
+
+                                                <CTableDataCell>
+                                                    <button className={`btn btn-primary mx-2`} onClick={() => UpdateStatus(id.UserID, "Approved")}>
+                                                        Approve
+                                                        <CIcon icon={icon.cilCheck} size="sm" />
+                                                    </button>
+                                                    <button className={`btn btn-danger mx-2`} onClick={() => UpdateStatus(id.UserID, "Rejected")}>
+                                                        Disapprove
+                                                        <CIcon icon={icon.cilTrash} size="sm" />
+                                                    </button>
+                                                    <button className={`btn btn-warning mx-2`} onClick={() => UpdateStatus(id.UserID, "OrderReadyToDeliver")}> Items Prepared
+                                                        <CIcon icon={icon.cilTruck} size="sm" />
+                                                    </button>
+
+                                                </CTableDataCell>
+
+                                            </CTableRow>
                                         </CTableBody>
                                     </CTable>
                                 </CCardBody>
